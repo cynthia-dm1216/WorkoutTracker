@@ -58,8 +58,8 @@ app.put("/api/workouts/:id",({body, params}, res) => {
     ).then(dbWorkout => {
         res.json(dbWorkout)
     }).catch (err => {
-        res.json(err)
-    })
+        res.json(err);
+});
 });
 
 app.get('/stats',(req,res) => {
@@ -80,4 +80,5 @@ app.get("/api/workouts/range", (req,res) => {
 app.listen(PORT, () => {
     console.log(`App running on port ${5000}!`);
 });
+
 
