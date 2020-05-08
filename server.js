@@ -13,21 +13,9 @@ app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(express.static("public"));
+
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
-
-
-// API Routes - /excercise , '/', '/stats'
-app.get("/excercise", (req, res) => {
-    res.sendFile(path.join(__dirname + './public/exercise.html'))
-});
-
-app.get('/',(req,res) => {
-    res.sendFile([path.join(__dirname + "./public/index.html")])
-});
-
-app.get('/stats', (req,res) => {
-    res.sendFile(path.join(__dirname + "./public/stats.html"))
-});
 
 // API route GET /api/workouts
 app.get("/api/workouts", (req, res) => {
@@ -40,29 +28,53 @@ app.get("/api/workouts", (req, res) => {
         });
 });
 
-app.get("/api/workouts/range", (req, res) => {
-    db.Workout.find({})
-        .then(dbWorkout => {
-            res.json(dbWorkout);
-        })
-        .catch(err => {
-            res.json(err);
-        });
+//HTML /exercise Route
+app.get("/exercise", (req,res) => {
+    res.sendFile(path.join(__dirname, "./public/exercise.html"));
 });
 
-app.post("/api/workouts", (req,res) => {
-    db.Workout.create({})
-    .then(dbWorkout => {
-        res.json(dbWorkout);
-    })
-    .catch(err => {
+app.get('/',(req,res) => {
+    res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+
+//Post route - /api/workouts
+app.post("/api/workouts",(req,res) => {
+   db.Workout.create({})
+   .then(dbWorkout => {
+       res.json(dbWorkout);
+   })
+   .catch(err => {
+       res.json(err);
+   });
+});
+
+//Put route - /api/workouts/:id
+app.put("/api/workouts/:id",({body, params}, res) => {
+    db.Workout.findByIdAndUpdate(
+        params.id, {
+            $push: {exercises: body }
+        },
+        { new: true}
+    ).then(dbWorkout => {
+        res.json(dbWorkout)
+    }).catch (err => {
         res.json(err)
     })
 });
 
-app.put("/api/workouts/:id", (req,res) => {
-    console.log(req.body);
-})
+app.get('/stats',(req,res) => {
+    res.sendFile(path.join(__dirname, "./public/stats.html"));
+});
+
+//API Get - api/workouts/range
+app.get("/api/workouts/range", (req,res) => {
+    db.Workout.find()
+    .then(dbWorkout => {
+        res.json(dbWorkout)
+    }).catch (err => {
+       res.json(err)
+    })
+});
 
 
 app.listen(PORT, () => {
